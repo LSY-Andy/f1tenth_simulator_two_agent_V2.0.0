@@ -107,5 +107,16 @@ You also need to manually delete `f1tenth_simulator_two_agents` dictionary in `~
 Please see [Wiki section](https://github.com/JZ76/f1tenth_simulator_two_agents/wiki) for instruction in detail
 
 
+## Citation
+
+    @INPROCEEDINGS{10275226,
+      author={Zhang, Jiancheng and Loidl, Hans–Wolfgang},
+      booktitle={2023 28th International Conference on Automation and Computing (ICAC)}, 
+      title={F1TENTH: An Over-taking Algorithm Using Machine Learning}, 
+      year={2023},
+      volume={},
+      number={},
+      pages={01-06},
+      doi={10.1109/ICAC57885.2023.10275226}}
 
 
