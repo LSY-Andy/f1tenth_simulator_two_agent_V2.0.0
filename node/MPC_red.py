@@ -115,6 +115,7 @@ class bicycle_model():
         yaw_next =   start_state[5] + dt * ((Fyf * self.l_f * np.cos(steering_angle) - Fyr * self.l_r) / self.Iz)
 
         end_state = [x_next, y_next, theta_next, vx_next, vy_next, yaw_next]
+        # vx_next, vy_next 两个方向速度
 
         return end_state
 
@@ -155,6 +156,7 @@ class NFTOCPNLP(object):
         self.buildFTOCP()
         self.solverTime = []
 
+
     def solve(self, x0, verbose=False):
         # Set initial condition + state and input box constraints
         self.lbx = x0.tolist() + (self.lowx).tolist() * self.N + (-self.bu).tolist() * self.N
@@ -193,8 +195,10 @@ class NFTOCPNLP(object):
             self.mpcInput = []
             self.feasible = 0
             rospy.logwarn("MPC solution Unfeasible")
+            
 
         return self.uPred[1]
+    
 
     def buildFTOCP(self):
 
@@ -255,7 +259,7 @@ if __name__ == '__main__':
 
     # anonymous=True flag means that rospy will choose a unique name for our 'listener' node
     # so that multiple listeners can run simultaneously.
-    rospy.init_node("MPC_red", anonymous=True)
+    rospy.init_node("MPC_red_Americas", anonymous=True)
 
     # need to add ~ before key name
     wheelbase = rospy.get_param("~wheelbase")
@@ -316,14 +320,26 @@ if __name__ == '__main__':
     # get an instance of RosPack with the default search paths
     rospack = rospkg.RosPack()
     reference_line_raw = pd.read_csv(rospack.get_path("f1tenth_simulator_two_agents") + "/maps/" + map_name + "_minTime.csv", sep=";")
+    reference_line_raw = reference_line_raw.iloc[::-1].reset_index(drop=True)
     # how many rows in the csv file
     size = reference_line_raw.shape[0]
 
     # same number in simulator.cpp publish_reference_line()
+
+    # de-epsana
+
+    # weight_x = 3
+    # weight_y = 3
+    # bias_x = 0
+    # bias_y = -85.9
+
+
+    # Americas
+
     weight_x = 3
     weight_y = 3
     bias_x = 0
-    bias_y = -85.9
+    bias_y = -112.5
 
     # a new dataframe that only contains useful information
     reference_line_x_y_theta = pd.DataFrame()
@@ -442,8 +458,19 @@ if __name__ == '__main__':
     # Gulf [80000.0, 80000.0, 50000.0, 125.0, 0.0, 0.0]
     # Malaysian [40000.0, 40000.0, 90000.0, 130.0, 0.0, 0.0]
     # Circuit-Of-The-Americas [100000.0, 100000.0, 70000.0, 100.0, 0.0, 0.0]
-    F = np.diag([100000.0, 100000.0, 70000.0, 110.0, 0.0, 0.0])
 
+    # de-Spanish 
+    # F = np.diag([100000.0, 100000.0, 70000.0, 110.0, 0.0, 0.0])
+    # F = np.diag([100000.0, 100000.0, 70000.0, 80.0, 0.0, 0.0])
+
+
+    # Americas 
+
+    # F = np.diag([100000.0, 100000.0, 70000.0, 100.0, 0.0, 0.0])
+    F = np.diag([100000.0, 100000.0, 70000.0, 80.0, 0.0, 0.0])
+    # 改变速度值 让mpc不那么飘
+
+    
     # car state constrains
     upx = np.array([10000, 10000, 10000, 100, 50, 50])
     lowx = np.array([-10000, -10000, -10000, 0, -50, -50])
@@ -469,9 +496,10 @@ if __name__ == '__main__':
     # pointer is the last goal index
     pointer = start + bias_index
 
-    # + 2*pi is to make sure the car theta is same as goal theta at the beginning
-    # this value can only be 0 or +-2pi, i.e. rotate 0 or +-360
-    goal_theta = reference_line_x_y_theta.iloc[pointer, 2]
+
+
+
+
 
     # main loop
     while not rospy.is_shutdown():
@@ -517,10 +545,21 @@ if __name__ == '__main__':
         if start == size-2:
             start = -1
 
+        # Spanish
         goal_index = (start + bias_index) % size
+            
+        # # Americas
+        # goal_index = (start - bias_index) % size
+
+
         # get x and y
         goal_x = reference_line_x_y_theta.iloc[goal_index, 0]
         goal_y = reference_line_x_y_theta.iloc[goal_index, 1]
+
+        # + 2*pi is to make sure the car theta is same as goal theta at the beginning
+        # this value can only be 0 or +-2pi, i.e. rotate 0 or +-360
+        goal_theta = reference_line_x_y_theta.iloc[pointer, 2]
+
         # calculate goal theta
         # prefix doesn't work here,
         # because when the pointer on the left hand side of 0 and the goal_index on the right hand side of 0,
@@ -532,17 +571,25 @@ if __name__ == '__main__':
             # rospy.loginfo("pointer "+str(pointer))
             # accumulate all delta theta between last goal and current goal
             goal_theta += reference_line_x_y_theta.iloc[pointer, 3]
+            # # 根据goal_theta的值调整
             pointer += 1
             pointer = pointer % size
+        if goal_theta > 0:
+            goal_theta -= math.pi
+        elif goal_theta < 0:
+            goal_theta += math.pi
+        
 
-        # rospy.loginfo("start  "+str(start))
-        # rospy.loginfo("goalx "+str(goal_x))
-        # rospy.loginfo("goaly "+str(goal_y))
-        # rospy.loginfo("goalt  "+str(goal_theta))
-        # rospy.loginfo("goali "+str(goal_index))
-        # rospy.loginfo("cx "+str(current_x))
-        # rospy.loginfo("cy "+str(current_y))
-        # rospy.loginfo("ct "+str(current_theta))
+    # # 更新或使用调整后的goal_theta值
+
+        rospy.loginfo("start  "+str(start))
+        rospy.loginfo("goalx "+str(goal_x))
+        rospy.loginfo("goaly "+str(goal_y))
+        rospy.loginfo("goalt  "+str(goal_theta))
+        rospy.loginfo("goali "+str(goal_index))
+        rospy.loginfo("cx "+str(current_x))
+        rospy.loginfo("cy "+str(current_y))
+        rospy.loginfo("ct "+str(current_theta))
 
         goal_msg = Marker()
         goal_msg.header.frame_id = map_frame

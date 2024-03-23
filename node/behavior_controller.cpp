@@ -21,6 +21,10 @@ using namespace racecar_simulator;
  */
 class BehaviorController {
 private:
+// 定义了BehaviorController类的私有成员，这些成员为节点提供了内部状态、配置参数和ROS通信能力
+    // 更改：
+    ros::Time start_time;
+    ros::Time end_time;
     // A ROS node
     ros::NodeHandle n;
 
@@ -28,6 +32,7 @@ private:
     ros::Subscriber key_sub;
     ros::Subscriber brake_bool_sub;
     ros::Subscriber switch_sub_red;
+    // 订阅自定义的切换信号，用于控制模式的切换。
 
     // Publisher for mux controller
     ros::Publisher mux_pub;
@@ -82,6 +87,8 @@ private:
     std::vector<bool> joy_button_previous {false, false, false, false, false, false, false, false, false, false, false};
 
 public:
+    // 初始化节点句柄，获取ROS参数（如主题名称和控制器索引），并为相关主题创建发布者和订阅者。
+    // 此外，它还初始化多路复用控制器的状态，设置紧急刹车标志为关闭状态，并预留多路复用控制器数组的空间。
     BehaviorController() {
         // Initialize the node handle
         n = ros::NodeHandle("~");
@@ -153,6 +160,7 @@ public:
 
     /// ---------------------- GENERAL HELPER FUNCTIONS ----------------------
 
+    // 构造并发布多路复用（MUX）消息，该消息指示当前哪个控制器被激活。
     void publish_mux() {
         // make mux message
         std_msgs::Int32MultiArray mux_msg;
@@ -166,6 +174,7 @@ public:
         mux_pub.publish(mux_msg);
     }
 
+    // 切换指定控制器的激活状态，并发布新状态。如果控制器已激活，则关闭它；如果控制器未激活，则打开它
     void toggle_mux(int mux_idx, std::string driver_name) {
         // This takes in an index and the name of the planner/driver and 
         // toggles the mux appropiately
@@ -176,11 +185,13 @@ public:
         }
         else {
             ROS_INFO_STREAM(driver_name << " turned on");
+            start_time = ros::Time::now();  // 记录开始时间
             mux_controller[mux_idx] = true;
             publish_mux();
         }
     }
 
+    // 特别用于紧急刹车的切换逻辑。它关闭所有控制器，只激活紧急刹车控制器，并发布新的MUX状态。
     void toggle_brake_mux() {
         ROS_INFO_STREAM("Emergency brake engaged");
         // turn everything off
@@ -194,7 +205,7 @@ public:
     }
 
 // ---------------------- CALLBACK FUNCTIONS ---------------------------------------------------------------------------
-
+    // 处理刹车信号的回调。当接收到刹车信号且安全标志被设置时，激活紧急刹车控制器。
     void brake_callback(const std_msgs::Bool & msg) {
         if (msg.data && safety_on) {
             toggle_brake_mux();
@@ -202,7 +213,7 @@ public:
             mux_controller[brake_mux_idx] = false;
         }
     }
-
+    // 处理游戏手柄输入的回调。这个函数根据手柄的按钮和轴的状态来切换不同的控制器，并可以控制数据记录的开始和停止。
     void joy_callback(const sensor_msgs::Joy & msg) {
         // the reason joy_callback looks different from key_callback is due to the different way of message publishing
         // In keyboard node, when a key is press down, a message is published, like a switch
@@ -299,6 +310,11 @@ public:
         if (msg.axes[lstm_axis_idx] == 1) {
             if (!joy_button_previous[lstm_axis_idx]) {
                 joy_button_previous[lstm_axis_idx] = true;
+                ROS_INFO_STREAM("Push!!!!!!!!!!!!!");
+                // 更改：
+                end_time = ros::Time::now();  // 记录结束时间
+                ros::Duration duration = end_time - start_time;
+                ROS_INFO_STREAM("Overtaking runtime: " << duration.toSec() << " seconds");
                 toggle_mux(lstm_mux_idx, "LSTM overtaking");
             }
         } else {
@@ -318,6 +334,7 @@ public:
 
     }
 
+    // 处理键盘输入的回调。这个函数根据接收到的字符串消息来切换不同的控制器。
     void key_callback(const std_msgs::String & msg) {
 
         // Changing mux controller:
@@ -358,6 +375,7 @@ public:
 
     }
 
+    
     void switch_callback(const std_msgs::Bool & msg) {
 //        if (msg.data and mux_controller[mpc_mux_idx]) {
 //            toggle_mux(mpc_mux_idx, "Model Predictive Control");

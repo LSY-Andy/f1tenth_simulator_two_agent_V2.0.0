@@ -223,7 +223,41 @@ public:
         // de-espana x:18 y:31 t:3.14
         // Malaysian x:18 y:31 t:3.14
         // Circuit-Of-The-Americas x:26 y:6 t:2.9
-        state_blue = {.x=18, .y=31, .theta=3.14, .velocity_x=0, .velocity_y=0, .steer_angle=0.0, .angular_velocity=0.0, .slip_angle=0.0, .st_dyn=false};
+
+        // de-espana
+        // point1
+        // state_blue = {.x=18, .y=31, .theta=3.14, .velocity_x=0, .velocity_y=0, .steer_angle=0.0, .angular_velocity=0.0, .slip_angle=0.0, .st_dyn=false};
+        // 直道上相对靠后的位置
+        // state_blue = {.x=43, .y=31, .theta=3.14, .velocity_x=0, .velocity_y=0, .steer_angle=0.0, .angular_velocity=0.0, .slip_angle=0.0, .st_dyn=false};
+        
+        
+        // point2
+        // state_blue = {.x=18, .y=38.5, .theta=2.63-3.14, .velocity_x=0, .velocity_y=0, .steer_angle=0.0, .angular_velocity=0.0, .slip_angle=0.0, .st_dyn=false};
+
+
+        // point3
+        // state_blue = {.x=73, .y=42, .theta=1.91, .velocity_x=0, .velocity_y=0, .steer_angle=0.0, .angular_velocity=0.0, .slip_angle=0.0, .st_dyn=false};
+
+
+
+
+
+        // Americas
+        // point0
+        // state_blue = {.x=26, .y=10, .theta=2.9-3.14, .velocity_x=0, .velocity_y=0, .steer_angle=0.0, .angular_velocity=0.0, .slip_angle=0.0, .st_dyn=false};
+        
+        // 基准测试 归0
+        // state_blue = {.x=0, .y=0, .theta=0, .velocity_x=0, .velocity_y=0, .steer_angle=0.0, .angular_velocity=0.0, .slip_angle=0.0, .st_dyn=false};
+        
+        // point1
+        state_blue = {.x=63, .y=45, .theta=1.05, .velocity_x=0, .velocity_y=0, .steer_angle=0.0, .angular_velocity=0.0, .slip_angle=0.0, .st_dyn=false};
+        
+        // point3
+        // state_blue = {.x=49, .y=54, .theta=0.35, .velocity_x=0, .velocity_y=0, .steer_angle=0.0, .angular_velocity=0.0, .slip_angle=0.0, .st_dyn=false};
+        
+        
+        
+        
         desired_speed_blue = 0.0;
         desired_steer_ang_blue = 0.0;
 
@@ -231,7 +265,34 @@ public:
         // de-espana x:22 y:30.5 t:3.14
         // Malaysian x:22 y:27.5 t:3.14
         // Circuit-Of-The-Americas x:30 y:3 t:2.9
-        state_red = {.x=22, .y=30.5, .theta=3.14, .velocity_x=0, .velocity_y=0, .steer_angle=0.0, .angular_velocity=0.0, .slip_angle=0.0, .st_dyn=false};
+
+
+        // de-espana
+        // point1
+        // state_red = {.x=22, .y=30.5, .theta=3.14, .velocity_x=0, .velocity_y=0, .steer_angle=0.0, .angular_velocity=0.0, .slip_angle=0.0, .st_dyn=false};
+        // 直道上相对靠后的位置
+        // state_red = {.x=45, .y=30.5, .theta=3.14, .velocity_x=0, .velocity_y=0, .steer_angle=0.0, .angular_velocity=0.0, .slip_angle=0.0, .st_dyn=false};
+        
+        
+        // point2
+        // state_red = {.x=16, .y=39, .theta=2.63-3.14, .velocity_x=0, .velocity_y=0, .steer_angle=0.0, .angular_velocity=0.0, .slip_angle=0.0, .st_dyn=false};
+        
+        // point3
+        // state_red = {.x=75, .y=39, .theta=1.91, .velocity_x=0, .velocity_y=0, .steer_angle=0.0, .angular_velocity=0.0, .slip_angle=0.0, .st_dyn=false};
+       
+       
+       
+        // Americas
+        // point0
+        // state_red = {.x=30, .y=10.5, .theta=2.9-3.14, .velocity_x=0, .velocity_y=0, .steer_angle=0.0, .angular_velocity=0.0, .slip_angle=0.0, .st_dyn=false};
+        
+        // point1
+        state_red = {.x=63.5, .y=43, .theta=1.05, .velocity_x=0, .velocity_y=0, .steer_angle=0.0, .angular_velocity=0.0, .slip_angle=0.0, .st_dyn=false};
+        
+        // point3
+        // state_red = {.x=47, .y=57, .theta=0.35, .velocity_x=0, .velocity_y=0, .steer_angle=0.0, .angular_velocity=0.0, .slip_angle=0.0, .st_dyn=false};
+
+        
         desired_speed_red = 0.0;
         desired_steer_ang_red = 0.0;
 
@@ -268,6 +329,7 @@ public:
         carState_pub_red = n.advertise<std_msgs::String>(carState_topic_red, 1);
 
         switch_pub_red = n.advertise<std_msgs::Bool>(switch_topic_red, 1);
+        // switch_pub_red = n.advertise<std_msgs::Bool>(switch_topic_red, 0);
 
         reference_line_pub = n.advertise<visualization_msgs::Marker>(reference_line, 0);
 
@@ -330,7 +392,8 @@ public:
         state_blue.velocity_x = std::min(std::max(state_blue.velocity_x, -params_blue.max_speed), params_blue.max_speed);
         state_blue.steer_angle = std::min(std::max(state_blue.steer_angle, -params_blue.max_steering_angle), params_blue.max_steering_angle);
 
-//        ROS_INFO_STREAM("V blue "<<state_blue.velocity_x);
+    //    ROS_INFO_STREAM("V blue "<<state_blue.velocity_x);
+    //    显示蓝车速度
 //        ROS_INFO_STREAM("X blue "<<state_blue.x);
 //        ROS_INFO_STREAM("Y blue "<<state_blue.y);
 //        ROS_INFO_STREAM("T blue "<<state_blue.theta);
@@ -498,7 +561,8 @@ public:
         state_red.velocity_x = std::min(std::max(state_red.velocity_x, -params_red.max_speed), params_red.max_speed);
         state_red.steer_angle = std::min(std::max(state_red.steer_angle, -params_red.max_steering_angle), params_red.max_steering_angle);
 
-//        ROS_INFO_STREAM("V red "<<state_red.velocity_x);
+    //    ROS_INFO_STREAM("V red "<<state_red.velocity_x);
+    //    显示车辆实际速度 4.5 5.5 6.5
 
         previous_seconds_red = current_seconds;
         // for machine learning, not necessarily
@@ -870,40 +934,47 @@ public:
         // weight is the scale in map_to_centerline.py in Racetrack-Preparation
         // bias is offset value, need some attempts, usually is resolution* width or height
         // Australia
-//        double weight_x = 5;
-//        double weight_y = 5;
-//        double bias_x = -120;
-//        double bias_y = 0;
-        // Shanghai
-//        double weight_x = 5;
-//        double weight_y = 5;
-//        double bias_x = 0;
-//        double bias_y = -65.1;
-        // Gulf-Air-Bahrain
-//        double weight_x = 6;
-//        double weight_y = 6;
-//        double bias_x = 0;
-//        double bias_y = -65.4;
-        // Malaysian
-//        double weight_x = 3;
-//        double weight_y = 3;
-//        double bias_x = 0;
-//        double bias_y = -60;
-        // Circuit-Of-The-Americas
-//        double weight_x = 3;
-//        double weight_y = 3;
-//        double bias_x = 0;
-//        double bias_y = -112.5;
-        //de-espana
-//        double weight_x = 3;
-//        double weight_y = 3;
-//        double bias_x = 0;
-//        double bias_y = -85.9;
+        //        double weight_x = 5;
+        //        double weight_y = 5;
+        //        double bias_x = -120;
+        //        double bias_y = 0;
+                // Shanghai
+        //        double weight_x = 5;
+        //        double weight_y = 5;
+        //        double bias_x = 0;
+        //        double bias_y = -65.1;
+                // Gulf-Air-Bahrain
+        //        double weight_x = 6;
+        //        double weight_y = 6;
+        //        double bias_x = 0;
+        //        double bias_y = -65.4;
+                // Malaysian
+        //        double weight_x = 3;
+        //        double weight_y = 3;
+        //        double bias_x = 0;
+        //        double bias_y = -60;
+                // Circuit-Of-The-Americas
+        //        double weight_x = 3;
+        //        double weight_y = 3;
+        //        double bias_x = 0;
+        //        double bias_y = -112.5;
+                //de-espana
+        //        double weight_x = 3;
+        //        double weight_y = 3;
+        //        double bias_x = 0;
+        //        double bias_y = -85.9;
 
+        // de-espana
+        // double weight_x = 3;
+        // double weight_y = 3;
+        // double bias_x = 0;
+        // double bias_y = -85.9;
+
+        // Americas
         double weight_x = 3;
         double weight_y = 3;
         double bias_x = 0;
-        double bias_y = -85.9;
+        double bias_y = -112.5;
 
         std::string line;
         // this is the heading

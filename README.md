@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # F1TENTH: An Over-taking Algorithm Using Machine Learning
 
 
@@ -120,3 +121,6 @@ Please see [Wiki section](https://github.com/JZ76/f1tenth_simulator_two_agents/w
       doi={10.1109/ICAC57885.2023.10275226}}
 
 
+=======
+# f1tenth_simulator_two_agents_V2.0.0
+>>>>>>> 1d03583d72ac91c444d22f8979b5d16d74868b71

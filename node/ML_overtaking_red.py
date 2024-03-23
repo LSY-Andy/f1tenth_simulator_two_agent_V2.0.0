@@ -149,4 +149,5 @@ if __name__ == '__main__':
             ack_msg.header.stamp = rospy.Time.now()
             ack_msg.drive.steering_angle = command[0, -1, 1] * 0.24
             ack_msg.drive.speed = command[0, -1, 0] * 17
+            # 17经验参数 可以通过改变来控制速度 红车
             drive_pub_red.publish(ack_msg)
